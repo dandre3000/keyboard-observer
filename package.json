@@ -28,5 +28,8 @@
   },
   "scripts": {
     "build": "tsc && bun build --entrypoints ./index.ts --outdir ./build --minify-whitespace --minify-syntax"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
   }
 }

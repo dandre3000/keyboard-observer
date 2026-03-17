@@ -16,7 +16,7 @@ export interface PointerState {
     movementY: number
 }
 
-type PromiseExecutor = ConstructorParameters<typeof Promise>[0]
+type PromiseExecutor = ConstructorParameters<PromiseConstructor>[0]
 type Resolve = Parameters<PromiseExecutor>[0]
 type Reject = Parameters<PromiseExecutor>[1]
 
@@ -28,14 +28,13 @@ interface PromiseData extends EventListenerObject {
     reject: Reject
 }
 
-const root = document.documentElement
-
 const eventTypePromiseDataMapReference: { [key: string]: PromiseData['eventMap'] } = {
     pointerenter: new Map,
     pointerdown: new Map,
     pointermove: new Map,
     pointerup: new Map,
     pointerleave: new Map,
+    click: new Map,
     keydown: new Map,
     keypress: new Map,
     keyup: new Map
@@ -92,10 +91,13 @@ const asyncEvent = <T>(eventName: string, idType: NumberConstructor | StringCons
     return promise as Promise<T>
 }
 
+const root = document.documentElement
 const pointerStateMap: Map<PointerEvent['pointerId'], PointerState> = new Map
 
 const updatePointerState = (event: PointerEvent) => {
     const {
+        target,
+        type,
         pointerId,
         buttons,
         screenX,
@@ -110,7 +112,7 @@ const updatePointerState = (event: PointerEvent) => {
 
     let pointerState: PointerState
 
-    if (event.type === 'pointerenter') {
+    if (type === 'pointerenter') {
         pointerStateMap.set(pointerId, pointerState = {
             button1: (buttons & 1) === 1,
             button2: (buttons & 2) === 2,
@@ -144,7 +146,7 @@ const updatePointerState = (event: PointerEvent) => {
         pointerState.movementY = movementY
     }
 
-    if (event.type === 'pointerleave' && event.target === root) pointerStateMap.delete(pointerId)
+    if (type === 'pointerleave' && target === root) pointerStateMap.delete(pointerId)
 
     return pointerState
 }
@@ -197,6 +199,7 @@ root.addEventListener('pointerenter', eventListener, true)
 root.addEventListener('pointerdown', eventListener, true)
 root.addEventListener('pointermove', eventListener, true)
 root.addEventListener('pointerup', eventListener, true)
+root.addEventListener('click', eventListener, true)
 root.addEventListener('pointerleave', eventListener, true)
 root.addEventListener('keydown', eventListener, true)
 root.addEventListener('keypress', eventListener, true)
@@ -217,6 +220,9 @@ export const asyncPointermove = (id: PointerEvent['pointerId'], signal?: AbortSi
 
 export const asyncPointerup = (id: PointerEvent['pointerId'], signal?: AbortSignal) =>
     asyncEvent<PointerState>('pointerup', Number, id, signal)
+
+export const asyncClick = (id: PointerEvent['pointerId'], signal?: AbortSignal) =>
+    asyncEvent<PointerState>('click', Number, id, signal)
 
 export const asyncPointerleave = (id: PointerEvent['pointerId'], signal?: AbortSignal) =>
     asyncEvent<PointerState>('pointerleave', Number, id, signal)
