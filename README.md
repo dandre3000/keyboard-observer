@@ -1,12 +1,60 @@
 # async-keyboard-pointer
 
-Use keyboard and pointer events asynchronously.
+Query keyboard and pointer states. Use keyboard and pointer events asynchronously.
 
 ## Installation
 
 npm i @dandre3000/async-keyboard-pointer
 
 ## Usage
+
+```js
+import {
+    asyncKeydown,
+    asyncPointerdown,
+    getKeyboardButtons,
+    getKeyboardState,
+    getPointerStateMap,
+    getPointerStates
+} from '@dandre3000/async-keyboard-pointer'
+
+await Promise.race([
+    asyncPointerdown(0),
+    asyncKeydown('Enter')
+])
+
+let intervalId
+
+const callback = () => {
+    const keyboardButtons = getKeyboardButtons('KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyP', 'KeyQ')
+    // or
+    const keyboardState = getKeyboardState()
+
+    const pointerState = getPointerStates(0)
+    // or for multitouch
+    const pointerStateMap = getPointerStateMap()
+
+    if (keyboardButtons[0]) console.log('KeyW')
+    if (keyboardButtons[1]) console.log('KeyA')
+    if (keyboardButtons[2]) console.log('KeyS')
+    if (keyboardButtons[3]) console.log('KeyD')
+    if (keyboardButtons[4]) console.log(pointerState)
+    if (keyboardButtons[5]) {
+        console.log('KeyQ')
+
+        Promise.race([
+            asyncPointerdown(0),
+            asyncKeydown('Enter')
+        ]).then(() => intervalId = requestAnimationFrame(callback))
+
+        return cancelAnimationFrame(intervalId)
+    }
+
+    intervalId = requestAnimationFrame(callback)
+}
+
+intervalId = requestAnimationFrame(callback)
+```
 
 ## Exports
 
