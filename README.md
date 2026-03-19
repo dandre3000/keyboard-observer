@@ -76,6 +76,14 @@ intervalId = requestAnimationFrame(callback)
     }
 </h4>
 
+#### activate: () => void
+
+Add keyboard and pointer event listeners to the root element and enable exported methods.
+
+#### deactivate: () => void
+
+Remove keyboard and pointer event listeners from the root element, disable exported methods and reject all promises returned by them.
+
 <h4>
     getPointerStates: (...idArray: [number]) => PointerState<br/>
     getPointerStates: (...idArray: number[]) => PointerState[]

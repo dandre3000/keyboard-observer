@@ -29,15 +29,15 @@ interface PromiseData extends EventListenerObject {
 }
 
 const eventTypePromiseDataMapReference: { [key: string]: PromiseData['eventMap'] } = {
-    pointerenter: new Map,
-    pointerdown: new Map,
-    pointermove: new Map,
-    pointerup: new Map,
-    pointerleave: new Map,
-    click: new Map,
-    keydown: new Map,
-    keypress: new Map,
-    keyup: new Map
+    pointerenter: undefined,
+    pointerdown: undefined,
+    pointermove: undefined,
+    pointerup: undefined,
+    pointerleave: undefined,
+    click: undefined,
+    keydown: undefined,
+    keypress: undefined,
+    keyup: undefined
 }
 
 const eventPromiseInit: Omit<Required<PromiseData>, 'resolve' | 'reject' | 'handleEvent' > & { idType: NumberConstructor | StringConstructor } = {
@@ -53,6 +53,8 @@ const abortListener: PromiseData['handleEvent'] = function (this: PromiseData) {
 }
 
 const eventPromiseExecutor: PromiseExecutor = (resolve, reject) => {
+    if (!active) throw new Error('Not active')
+
     const { eventMap, signal, idType } = eventPromiseInit
     let id = idType(eventPromiseInit.id)
 
@@ -194,17 +196,74 @@ const eventListener: EventListener = (event: PointerEvent | KeyboardEvent) => {
     }
 }
 
-root.addEventListener('keydown', eventListener, true)
-root.addEventListener('keypress', eventListener, true)
-root.addEventListener('keyup', eventListener, true)
-root.addEventListener('pointerenter', eventListener, true)
-root.addEventListener('pointerdown', eventListener, true)
-root.addEventListener('pointermove', eventListener, true)
-root.addEventListener('pointerup', eventListener, true)
-root.addEventListener('click', eventListener, true)
-root.addEventListener('pointerleave', eventListener, true)
+let active = false
+
+/**
+ * Add keyboard and pointer event listeners to the root element and enable exported methods.
+ */
+export const activate = () => {
+    if (active) return
+
+    const eventNames = [
+        'keydown',
+        'keypress',
+        'keyup',
+        'pointerenter',
+        'pointerdown',
+        'pointermove',
+        'pointerup',
+        'click',
+        'pointerleave'
+    ]
+
+    active = true
+
+    for (let i = 0; i < eventNames.length; i++) {
+        root.addEventListener(eventNames[i], eventListener, true)
+
+        eventTypePromiseDataMapReference[eventNames[i]] = new Map
+    }
+}
+
+/**
+ * Remove keyboard and pointer event listeners from the root element, disable exported methods and
+ * reject all promises returned by them.
+ */
+export const deactivate = () => {
+    if (!active) return
+
+    const eventNames = [
+        'keydown',
+        'keypress',
+        'keyup',
+        'pointerenter',
+        'pointerdown',
+        'pointermove',
+        'pointerup',
+        'click',
+        'pointerleave'
+    ]
+
+    active = false
+    keyboardSet.clear()
+    pointerStateMap.clear()
+
+    for (let i = 0; i < eventNames.length; i++) {
+        root.removeEventListener(eventNames[i], eventListener, true)
+
+        for (const [id, set] of eventTypePromiseDataMapReference[eventNames[i]]) {
+            for (const promiseData of set) {
+                promiseData.reject(new Error('Deactivate'))
+            }
+        }
+
+        eventTypePromiseDataMapReference[eventNames[i]] = undefined
+    }
+}
 
 export const getKeyboardButtons = <T extends KeyboardEvent['code'][]>(...codeArray: T): T['length'] extends 1 ? boolean : boolean[] => {
+    if (!active) throw new Error('Not active')
+
     if (codeArray.length === 1) {
         return keyboardSet.has(codeArray[0]) as any
     } else {
@@ -221,6 +280,8 @@ export const getKeyboardButtons = <T extends KeyboardEvent['code'][]>(...codeArr
 export const getKeyboardState = () => new Set(keyboardSet)
 
 export const getPointerStates = <T extends PointerEvent['pointerId'][]>(...idArray: T): T['length'] extends 1 ? PointerState : PointerState[] => {
+    if (!active) throw new Error('Not active')
+
     if (idArray.length === 1) {
         const pointerState = pointerStateMap.get(idArray[0])
 
