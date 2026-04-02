@@ -28,12 +28,14 @@ setInterval(() => {
 
 ### Instance methods
 
-#### getButtons (keyCode: string): boolean
-#### getButtons (...keyCodes: string[]): boolean[]
+<h4>
+    getButtons (keyCode: string): boolean</br>
+    getButtons (...keyCodes: string[]): boolean[]
+</h4>
 
-#### getPressedKeyCodes (): Set<string>
+#### getPressedKeyCodes (): Set&lt;string&gt;
 
-#### getNextEvent (type: KeyboardEventTypes): Promise<KeyboardEvent>
+#### getNextEvent (type: KeyboardEventTypes): Promise&lt;KeyboardEvent&gt;
 
 ## License
 
