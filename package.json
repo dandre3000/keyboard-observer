@@ -1,5 +1,5 @@
 {
-  "name": "@dandre3000/keyboard-observer",
+  "name": "@dandre3000/keyboard-input",
   "version": "0.1.0",
   "license": "MIT",
   "author": {
@@ -9,9 +9,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dandre3000/keyboard-observer.git"
+    "url": "git+https://github.com/dandre3000/keyboard-input.git"
   },
-  "description": "Query keyboard state and use keyboard events asynchronously.",
+  "description": "Query keyboard state.",
   "keywords": [
     "keyboard",
     "input",
@@ -31,7 +31,5 @@
   "devDependencies": {
     "typescript": "^5.9.3"
   },
-  "dependencies": {
-    "@dandre3000/dereference-registry": "^0.2.0"
-  }
+  "type": "module"
 }

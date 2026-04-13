@@ -1,41 +1,37 @@
-# keyboard-observer
+# keyboard-input
 
-Query keyboard state and use keyboard events asynchronously.
+Query keyboard state.
 
 ## Installation
 
-npm i @dandre3000/keyboard-observer
+npm i @dandre3000/keyboard-input
 
 ## Usage
 
 ```js
-import KeyboardObserver from '@dandre3000/keyboard-observer'
+import KeyboardInput from '@dandre3000/keyboard-input'
 
-let k = new KeyboardObserver(document.documentElement)
-
-await k.getNextEvent('keydown').then(e => console.log(e))
+let k = new KeyboardInput(document.documentElement)
 
 setInterval(() => {
-    console.log(k.getButtons('KeyQ', 'KeyW'))
+    console.log(k.areButtonsPressed('KeyQ', 'KeyW'))
 }, 1000 / 60)
 ```
 
 ## Exports
 
-### Class KeyboardObserver
+### Class KeyboardInput
 
 #### constructor (eventTarget: EventTarget)
 
 ### Instance methods
 
 <h4>
-    getButtons (keyCode: string): boolean</br>
-    getButtons (...keyCodes: string[]): boolean[]
+    areButtonsPressed (keyCode: string): boolean</br>
+    areButtonsPressed (...keyCodes: string[]): boolean[]
 </h4>
 
-#### getPressedKeyCodes (): Set&lt;string&gt;
-
-#### getNextEvent (type: KeyboardEventTypes): Promise&lt;KeyboardEvent&gt;
+#### getPressedButtonSet (): Set&lt;string&gt;
 
 ## License
 
