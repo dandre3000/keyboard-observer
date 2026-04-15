@@ -14,7 +14,7 @@ import KeyboardInput from '@dandre3000/keyboard-input'
 let k = new KeyboardInput(document.documentElement)
 
 setInterval(() => {
-    console.log(k.areButtonsPressed('KeyQ', 'KeyW'))
+    console.log(k.getButtons('KeyQ', 'KeyW')) // [ boolean, boolean ]
 }, 1000 / 60)
 ```
 
@@ -24,15 +24,19 @@ setInterval(() => {
 
 #### constructor (eventTarget: EventTarget)
 
+### Static methods
+
+#### patchEventStopImmediatePropagation (): void
+
 ### Instance methods
 
 <h4>
-    areButtonsPressed (keyCode: string): boolean</br>
-    areButtonsPressed (...keyCodes: string[]): boolean[]
+    getButtons (keyCode: string): boolean</br>
+    getButtons (...keyCodes: string[]): boolean[]
 </h4>
 
-#### getPressedButtonSet (): Set&lt;string&gt;
+#### getButtonSet (): Set&lt;string&gt;
 
 ## License
 
-[MIT](https://github.com/dandre3000/keyboard-observer/blob/main/LICENSE)
+[MIT](https://github.com/dandre3000/keyboard-input/blob/main/LICENSE)

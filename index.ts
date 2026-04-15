@@ -1,18 +1,22 @@
 type KeyCode = KeyboardEvent['code'] | KeyboardEvent['key']
 
-interface KeyboardInputData extends EventListenerObject {
+interface EventTargetData extends EventListenerObject {
     symbol: symbol
     target: EventTarget
     buttons: Set<KeyCode>
-    handleEvent: (this: KeyboardInputData) => void
 }
+
+const targetDataMap: WeakMap<Element, EventTargetData>
+const eventSet: WeakSet<Event>
 
 export class KeyboardInput {
     static #symbol = Symbol()
 
-    #data: KeyboardInputData
+    #data: EventTargetData
 
-    static #listener (this: KeyboardInputData, event: KeyboardEvent) {
+    static #listener (this: EventTargetData, event: KeyboardEvent) {
+        eventSet.add(event) // skip if patched event.stopImmediatePropagation is called after this listener
+
         if (event.type === 'keyup') {
             this.buttons.delete(event.code)
             if (event.code !== event.key) this.buttons.delete(event.key)
@@ -22,22 +26,38 @@ export class KeyboardInput {
         }
     }
 
+    static patchEventStopImmediatePropagation () {
+        const stopImmediatePropagation = Event.prototype.stopImmediatePropagation
+
+        return function (this: Event) {
+            stopImmediatePropagation.call(this)
+
+            if (!eventSet.has(event) && event instanceof KeyboardEvent) PointerInput.#listener(this)
+        }
+    }
+
     constructor (target: EventTarget) {
         if (!(target instanceof EventTarget)) throw new TypeError
 
-        this.#data = {
-            symbol: KeyboardInput.#symbol,
-            target,
-            buttons: new Set,
-            handleEvent: KeyboardInput.#listener
+        let targetData = targetDataMap.get(target)
+
+        if (!targetData) {
+            targetDataMap.set(target, targetData = {
+                symbol: KeyboardInput.#symbol,
+                target,
+                buttons: new Set,
+                handleEvent: KeyboardInput.#listener
+            })
+
+            target.addEventListener('keydown', this.#data, true)
+            target.addEventListener('keypress', this.#data, true)
+            target.addEventListener('keyup', this.#data, true)
         }
 
-        target.addEventListener('keydown', this.#data, true)
-        target.addEventListener('keypress', this.#data, true)
-        target.addEventListener('keyup', this.#data, true)
+        this.#data = targetData
     }
 
-    areButtonsPressed <T extends KeyCode[]>(...keyCodes: T): T['length'] extends 1 ? boolean : boolean[] {
+    getButtons <T extends KeyCode[]>(...keyCodes: T): T['length'] extends 1 ? boolean : boolean[] {
         if (this.#data?.symbol !== KeyboardInput.#symbol)
             throw TypeError(`this (${Object.prototype.toString.call(this)}) is not a KeyboardInput instance`)
 
@@ -52,7 +72,7 @@ export class KeyboardInput {
         return buttons as any
     }
 
-    getPressedButtonSet () {
+    getButtonSet () {
         if (this.#data?.symbol !== KeyboardInput.#symbol)
             throw new TypeError(`this (${Object.prototype.toString.call(this)}) is not a KeyboardInput instance`)
 
