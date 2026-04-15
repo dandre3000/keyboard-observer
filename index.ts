@@ -1,17 +1,14 @@
 type KeyCode = KeyboardEvent['code'] | KeyboardEvent['key']
 
 interface EventTargetData extends EventListenerObject {
-    symbol: symbol
     target: EventTarget
     buttons: Set<KeyCode>
 }
 
-const targetDataMap: WeakMap<Element, EventTargetData>
-const eventSet: WeakSet<Event>
+const targetDataMap: WeakMap<Element, EventTargetData> = new WeakMap
+const eventSet: WeakSet<Event> = new WeakSet
 
 export class KeyboardInput {
-    static #symbol = Symbol()
-
     #data: EventTargetData
 
     static #listener (this: EventTargetData, event: KeyboardEvent) {
@@ -43,7 +40,6 @@ export class KeyboardInput {
 
         if (!targetData) {
             targetDataMap.set(target, targetData = {
-                symbol: KeyboardInput.#symbol,
                 target,
                 buttons: new Set,
                 handleEvent: KeyboardInput.#listener
@@ -58,7 +54,7 @@ export class KeyboardInput {
     }
 
     getButtons <T extends KeyCode[]>(...keyCodes: T): T['length'] extends 1 ? boolean : boolean[] {
-        if (this.#data?.symbol !== KeyboardInput.#symbol)
+        if (this.#data?.handleEvent !== KeyboardInput.#listener)
             throw TypeError(`this (${Object.prototype.toString.call(this)}) is not a KeyboardInput instance`)
 
         if (keyCodes.length === 1) return this.#data.buttons.has(String(keyCodes[0])) as any
@@ -73,7 +69,7 @@ export class KeyboardInput {
     }
 
     getButtonSet () {
-        if (this.#data?.symbol !== KeyboardInput.#symbol)
+        if (this.#data?.handleEvent !== KeyboardInput.#listener)
             throw new TypeError(`this (${Object.prototype.toString.call(this)}) is not a KeyboardInput instance`)
 
         return new Set(this.#data.buttons)
