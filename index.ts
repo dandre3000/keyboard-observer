@@ -45,9 +45,9 @@ export class KeyboardInput {
                 handleEvent: KeyboardInput.#listener
             })
 
-            target.addEventListener('keydown', this.#data, true)
-            target.addEventListener('keypress', this.#data, true)
-            target.addEventListener('keyup', this.#data, true)
+            target.addEventListener('keydown', targetData, true)
+            target.addEventListener('keypress', targetData, true)
+            target.addEventListener('keyup', targetData, true)
         }
 
         this.#data = targetData
